@@ -59,6 +59,36 @@ export default function AdminPanel({
     toast({ title: 'Успех', description: 'Аниме обновлено!' });
   };
 
+  const handleToggleSelect = (id: number) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredAnimeList.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredAnimeList.map(a => a.id));
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.length === 0) return;
+    
+    const confirmMsg = `Удалить ${selectedIds.length} аниме? Это действие нельзя отменить.`;
+    if (!confirm(confirmMsg)) return;
+
+    const count = selectedIds.length;
+    selectedIds.forEach(id => onDeleteAnime(id));
+    setSelectedIds([]);
+    
+    toast({ 
+      title: 'Успех', 
+      description: `Удалено ${count} аниме` 
+    });
+  };
+
   const filteredAnimeList = animeList
     .filter(anime => 
       anime.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -224,8 +254,23 @@ export default function AdminPanel({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">Всего аниме на сайте: {animeList.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">Вы можете редактировать или удалить любое аниме</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {selectedIds.length > 0 
+                  ? `Выбрано: ${selectedIds.length} аниме`
+                  : 'Вы можете редактировать или удалить любое аниме'
+                }
+              </p>
             </div>
+            {selectedIds.length > 0 && (
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={handleDeleteSelected}
+              >
+                <Icon name="Trash2" size={16} className="mr-2" />
+                Удалить выбранные ({selectedIds.length})
+              </Button>
+            )}
           </div>
           
           <div className="flex gap-2">
@@ -247,12 +292,29 @@ export default function AdminPanel({
               </SelectContent>
             </Select>
           </div>
+
+          {filteredAnimeList.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSelectAll}
+              >
+                <Icon name={selectedIds.length === filteredAnimeList.length ? "CheckSquare" : "Square"} size={16} className="mr-2" />
+                {selectedIds.length === filteredAnimeList.length ? 'Снять выделение' : 'Выбрать все'}
+              </Button>
+              {selectedIds.length > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  {selectedIds.length} из {filteredAnimeList.length}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         
         <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
-        
-        {editingAnime && (
-          <div className="mb-4 p-4 rounded-lg bg-primary/10 border-2 border-primary space-y-3">
+          {editingAnime && (
+            <div className="mb-4 p-4 rounded-lg bg-primary/10 border-2 border-primary space-y-3">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-semibold flex items-center gap-2">
                 <Icon name="Edit" size={18} />
@@ -335,55 +397,71 @@ export default function AdminPanel({
                 Отмена
               </Button>
             </div>
-          </div>
-        )}
+            </div>
+          )}
 
-        {filteredAnimeList.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Icon name={searchTerm ? "Search" : "FileX"} size={48} className="mx-auto mb-2 opacity-50" />
-            <p>{searchTerm ? 'Ничего не найдено' : 'Аниме пока нет. Добавьте первое!'}</p>
-            {searchTerm && (
-              <Button variant="link" size="sm" onClick={() => setSearchTerm('')}>
-                Очистить поиск
-              </Button>
-            )}
-          </div>
-        ) : (
-          filteredAnimeList.map(anime => (
-            <div key={anime.id} className="flex items-center justify-between p-3 rounded-lg bg-card border border-border hover:border-primary transition-colors">
-              <div className="flex items-center gap-3 flex-1">
+          {filteredAnimeList.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Icon name={searchTerm ? "Search" : "FileX"} size={48} className="mx-auto mb-2 opacity-50" />
+              <p>{searchTerm ? 'Ничего не найдено' : 'Аниме пока нет. Добавьте первое!'}</p>
+              {searchTerm && (
+                <Button variant="link" size="sm" onClick={() => setSearchTerm('')}>
+                  Очистить поиск
+                </Button>
+              )}
+            </div>
+          ) : (
+            filteredAnimeList.map(anime => (
+              <div 
+                key={anime.id} 
+                className={`flex items-center gap-3 p-3 rounded-lg bg-card border transition-colors ${
+                  selectedIds.includes(anime.id) 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-border hover:border-primary'
+                }`}
+              >
+                <button
+                  onClick={() => handleToggleSelect(anime.id)}
+                  className="flex-shrink-0 w-5 h-5 rounded border-2 border-primary flex items-center justify-center transition-colors hover:bg-primary/10"
+                >
+                  {selectedIds.includes(anime.id) && (
+                    <Icon name="Check" size={14} className="text-primary" />
+                  )}
+                </button>
+                
                 <img src={anime.thumbnail_url} alt={anime.title} className="w-12 h-16 object-cover rounded" />
-                <div className="flex-1">
-                  <p className="font-medium">{anime.title}</p>
+                
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{anime.title}</p>
                   <p className="text-sm text-muted-foreground">{anime.genre} • {anime.year} • {anime.type === 'series' ? 'Сериал' : 'Фильм'}</p>
                   <p className="text-xs text-muted-foreground">Рейтинг: {anime.rating.toFixed(1)}/10 ({anime.rating_count} оценок)</p>
                 </div>
+                
+                <div className="flex gap-2 flex-shrink-0">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setEditingAnime(anime)}
+                  >
+                    <Icon name="Edit" size={16} className="mr-1" />
+                    Изменить
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={() => {
+                      if (confirm(`Удалить "${anime.title}"? Это действие нельзя отменить.`)) {
+                        onDeleteAnime(anime.id);
+                      }
+                    }}
+                  >
+                    <Icon name="Trash2" size={16} />
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setEditingAnime(anime)}
-                >
-                  <Icon name="Edit" size={16} className="mr-1" />
-                  Изменить
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  onClick={() => {
-                    if (confirm(`Удалить "${anime.title}"? Это действие нельзя отменить.`)) {
-                      onDeleteAnime(anime.id);
-                    }
-                  }}
-                >
-                  <Icon name="Trash2" size={16} className="mr-1" />
-                  Удалить
-                </Button>
-              </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
       </TabsContent>
       <TabsContent value="password" className="space-y-4">
         <div className="space-y-4">
