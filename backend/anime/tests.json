@@ -1,0 +1,20 @@
+{
+  "tests": [
+    {
+      "name": "Get all anime",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": "array",
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get anime with filter",
+      "method": "GET",
+      "path": "/?type=series&genre=Приключения",
+      "expectedStatus": 200,
+      "expectedBody": "array",
+      "bodyMatcher": "partial"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "tests": [
+    {
+      "name": "Rate anime",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "anime_id": 1,
+        "rating": 9
+      },
+      "expectedStatus": 401,
+      "bodyMatcher": "partial"
+    }
+  ]
+}
