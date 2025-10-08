@@ -32,6 +32,7 @@ export default function Header({
   registerDialogContent,
 }: HeaderProps) {
   const [isSecurityOpen, setIsSecurityOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const securityDocumentation = `# 🔐 ДЕКЛАРАЦИЯ БЕЗОПАСНОСТИ DOCK ANIME
 
@@ -197,12 +198,22 @@ HAVING COUNT(*) > 10;
               <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">Контакты</a>
             </nav>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Мобильное меню-бургер */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <Icon name={isMobileMenuOpen ? "X" : "Menu"} size={24} />
+            </Button>
+
             <Dialog open={isSecurityOpen} onOpenChange={setIsSecurityOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="hidden sm:flex">
                   <Icon name="Shield" size={16} className="mr-2" />
-                  Безопасность
+                  <span className="hidden lg:inline">Безопасность</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -408,13 +419,13 @@ HAVING COUNT(*) > 10;
             
             {user ? (
               <>
-                <span className="text-sm text-muted-foreground">{user.email}</span>
+                <span className="text-sm text-muted-foreground hidden sm:inline truncate max-w-[120px]">{user.email}</span>
                 {user.is_admin && (
                   <Dialog open={isAdminOpen} onOpenChange={setIsAdminOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm">
-                        <Icon name="Settings" size={16} className="mr-2" />
-                        Админ
+                        <Icon name="Settings" size={16} className="sm:mr-2" />
+                        <span className="hidden sm:inline">Админ</span>
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
@@ -426,8 +437,8 @@ HAVING COUNT(*) > 10;
                   </Dialog>
                 )}
                 <Button variant="outline" size="sm" onClick={onLogout}>
-                  <Icon name="LogOut" size={16} className="mr-2" />
-                  Выйти
+                  <Icon name="LogOut" size={16} className="sm:mr-2" />
+                  <span className="hidden sm:inline">Выйти</span>
                 </Button>
               </>
             ) : (
@@ -435,8 +446,8 @@ HAVING COUNT(*) > 10;
                 <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
-                      <Icon name="LogIn" size={16} className="mr-2" />
-                      Войти
+                      <Icon name="LogIn" size={16} className="sm:mr-2" />
+                      <span className="hidden sm:inline">Войти</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
@@ -459,6 +470,38 @@ HAVING COUNT(*) > 10;
             )}
           </div>
         </div>
+
+        {/* Мобильное выдвижное меню */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-border animate-in slide-in-from-top-2 duration-200">
+            <nav className="flex flex-col py-4 space-y-1">
+              <a href="#" className="px-4 py-3 text-sm font-medium hover:bg-muted transition-colors active:bg-muted/80">
+                🏠 Главная
+              </a>
+              <a href="#series" className="px-4 py-3 text-sm font-medium hover:bg-muted transition-colors active:bg-muted/80">
+                📺 Аниме-сериалы
+              </a>
+              <a href="#movies" className="px-4 py-3 text-sm font-medium hover:bg-muted transition-colors active:bg-muted/80">
+                🎬 Фильмы
+              </a>
+              <a href="#genres" className="px-4 py-3 text-sm font-medium hover:bg-muted transition-colors active:bg-muted/80">
+                🎭 Жанры
+              </a>
+              <a href="#top" className="px-4 py-3 text-sm font-medium hover:bg-muted transition-colors active:bg-muted/80">
+                ⭐ Топ
+              </a>
+              <a href="#new" className="px-4 py-3 text-sm font-medium hover:bg-muted transition-colors active:bg-muted/80">
+                🆕 Новинки
+              </a>
+              <button 
+                onClick={() => setIsSecurityOpen(true)}
+                className="px-4 py-3 text-sm font-medium hover:bg-muted transition-colors active:bg-muted/80 text-left"
+              >
+                🛡️ Безопасность
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

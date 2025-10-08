@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { type Anime } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
 
 interface AdminPanelProps {
   newAnime: {
@@ -86,6 +87,34 @@ export default function AdminPanel({
     toast({ 
       title: 'Успех', 
       description: `Удалено ${count} аниме` 
+    });
+  };
+
+  const handleExportToExcel = () => {
+    const data = animeList.map(anime => ({
+      'ID': anime.id,
+      'Название': anime.title,
+      'Описание': anime.description || '',
+      'Тип': anime.type === 'series' ? 'Сериал' : 'Фильм',
+      'Жанр': anime.genre,
+      'Год': anime.year,
+      'Эпизоды': anime.episodes,
+      'Рейтинг': anime.rating.toFixed(1),
+      'Оценок': anime.rating_count,
+      'Обложка': anime.thumbnail_url || '',
+      'Видео': anime.video_url || ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Аниме');
+    
+    const fileName = `anime_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    
+    toast({ 
+      title: 'Экспорт завершён', 
+      description: `Файл ${fileName} скачан` 
     });
   };
 
@@ -261,16 +290,26 @@ export default function AdminPanel({
                 }
               </p>
             </div>
-            {selectedIds.length > 0 && (
+            <div className="flex gap-2">
               <Button 
-                variant="destructive" 
+                variant="outline" 
                 size="sm"
-                onClick={handleDeleteSelected}
+                onClick={handleExportToExcel}
               >
-                <Icon name="Trash2" size={16} className="mr-2" />
-                Удалить выбранные ({selectedIds.length})
+                <Icon name="Download" size={16} className="mr-2" />
+                Excel
               </Button>
-            )}
+              {selectedIds.length > 0 && (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={handleDeleteSelected}
+                >
+                  <Icon name="Trash2" size={16} className="mr-2" />
+                  Удалить ({selectedIds.length})
+                </Button>
+              )}
+            </div>
           </div>
           
           <div className="flex gap-2">

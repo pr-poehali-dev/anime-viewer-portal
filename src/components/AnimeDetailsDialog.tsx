@@ -29,17 +29,17 @@ export default function AnimeDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] sm:max-h-[80vh] overflow-y-auto p-4 sm:p-6">
         <div>
           <DialogHeader>
-            <DialogTitle className="text-2xl">{anime.title}</DialogTitle>
+            <DialogTitle className="text-xl sm:text-2xl">{anime.title}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <img 
                 src={anime.thumbnail_url} 
                 alt={anime.title}
-                className="w-full rounded-lg"
+                className="w-full rounded-lg shadow-xl"
               />
               <div className="space-y-4">
                 <div>

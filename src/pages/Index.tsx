@@ -11,6 +11,7 @@ import AnimeCard from '@/components/AnimeCard';
 import AnimeDetailsDialog from '@/components/AnimeDetailsDialog';
 import AdminPanel from '@/components/AdminPanel';
 import Footer from '@/components/Footer';
+import RandomAnimeButton from '@/components/RandomAnimeButton';
 
 const genres = ['Все', 'Приключения', 'Экшен', 'Фэнтези', 'Фантастика', 'Комедия', 'Драма'];
 const years = ['Все', '2024', '2023', '2022', '2021', '2020'];
@@ -310,8 +311,14 @@ export default function Index() {
           <div className="flex justify-center py-16">
             <Icon name="Loader2" size={48} className="animate-spin text-primary" />
           </div>
+        ) : animeList.length === 0 ? (
+          <div className="text-center py-16">
+            <Icon name="Search" size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="text-xl font-semibold mb-2">Ничего не найдено</h3>
+            <p className="text-muted-foreground">Попробуйте изменить фильтры или поисковый запрос</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
             {animeList.map(anime => (
               <AnimeCard
                 key={anime.id}
@@ -321,15 +328,13 @@ export default function Index() {
             ))}
           </div>
         )}
-
-        {animeList.length === 0 && !loading && (
-          <div className="text-center py-16">
-            <Icon name="Search" size={48} className="mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">Ничего не найдено</h3>
-            <p className="text-muted-foreground">Попробуйте изменить параметры фильтра</p>
-          </div>
-        )}
       </div>
+
+      {/* Кнопка случайного аниме */}
+      <RandomAnimeButton 
+        animeList={animeList}
+        onSelect={openAnimeDetails}
+      />
 
       <AnimeDetailsDialog
         open={isAnimeDetailsOpen}
