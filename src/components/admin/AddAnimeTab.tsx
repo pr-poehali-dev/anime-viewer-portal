@@ -163,7 +163,7 @@ export default function AddAnimeTab({
       <Button 
         className="w-full" 
         onClick={onCreateAnime}
-        disabled={isUploading || !newAnime.title || !newAnime.thumbnail_url}
+        disabled={isUploading || !newAnime.title}
       >
         <Icon name="Upload" size={16} className="mr-2" />
         Опубликовать аниме на сайт

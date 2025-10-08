@@ -210,25 +210,16 @@ export const api = {
 
   upload: {
     file: async (file: File): Promise<string> => {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = async () => {
-          try {
-            const base64 = (reader.result as string).split(',')[1];
-            
-            // For now, use a mock upload (client-side only solution)
-            // In production, this would upload to cloud storage
-            const mockUrl = `https://storage.dock-anime.ru/uploads/${Date.now()}_${file.name}`;
-            
-            // Simulate upload delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            resolve(mockUrl);
-          } catch (error) {
-            reject(error);
-          }
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          resolve(dataUrl);
         };
-        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.onerror = () => {
+          const fallbackUrl = `https://placehold.co/400x600/1a1a1a/white?text=${encodeURIComponent(file.name.substring(0, 10))}`;
+          resolve(fallbackUrl);
+        };
         reader.readAsDataURL(file);
       });
     },
