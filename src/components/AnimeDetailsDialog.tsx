@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 import { type Anime, type User } from '@/lib/api';
+import VideoPlayer from '@/components/VideoPlayer';
 
 interface AnimeDetailsDialogProps {
   open: boolean;
@@ -35,6 +36,8 @@ export default function AnimeDetailsDialog({
             <DialogTitle className="text-xl sm:text-2xl">{anime.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
+            <VideoPlayer videoUrl={anime.video_url} title={anime.title} />
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <img 
                 src={anime.thumbnail_url} 

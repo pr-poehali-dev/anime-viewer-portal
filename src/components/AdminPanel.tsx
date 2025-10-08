@@ -4,6 +4,7 @@ import { type Anime } from '@/lib/api';
 import AddAnimeTab from './admin/AddAnimeTab';
 import ManageAnimeTab from './admin/ManageAnimeTab';
 import PasswordTab from './admin/PasswordTab';
+import BannersTab from './admin/BannersTab';
 
 interface AdminPanelProps {
   newAnime: {
@@ -38,7 +39,7 @@ export default function AdminPanel({
 }: AdminPanelProps) {
   return (
     <Tabs defaultValue="add" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="add">
           <Icon name="Plus" size={16} className="mr-2" />
           Добавить аниме
@@ -46,6 +47,10 @@ export default function AdminPanel({
         <TabsTrigger value="manage">
           <Icon name="List" size={16} className="mr-2" />
           Управление ({animeList.length})
+        </TabsTrigger>
+        <TabsTrigger value="banners">
+          <Icon name="Image" size={16} className="mr-2" />
+          Баннеры
         </TabsTrigger>
         <TabsTrigger value="password">
           <Icon name="Key" size={16} className="mr-2" />
@@ -69,6 +74,10 @@ export default function AdminPanel({
           onDeleteAnime={onDeleteAnime}
           onUpdateAnime={onUpdateAnime}
         />
+      </TabsContent>
+      
+      <TabsContent value="banners">
+        <BannersTab />
       </TabsContent>
       
       <TabsContent value="password">
