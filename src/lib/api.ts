@@ -3,6 +3,7 @@ const API_URLS = {
   anime: 'https://functions.poehali.dev/29e057e5-c931-40e5-8321-699b3ebedb4e',
   ratings: 'https://functions.poehali.dev/cf1fa107-8ab3-4d4b-a99a-6cd8a5e5a27c',
   comments: 'https://functions.poehali.dev/0a718001-2c9e-4dba-8644-026735be4aaf',
+  changePassword: 'https://functions.poehali.dev/f8ea27dd-7f57-40fc-9e8e-15549e08ead7',
 };
 
 export interface Anime {
@@ -184,6 +185,25 @@ export const api = {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to rate anime');
+      return data;
+    },
+  },
+
+  password: {
+    change: async (oldPassword: string, newPassword: string): Promise<{ message: string }> => {
+      const token = getToken();
+      if (!token) throw new Error('Требуется авторизация');
+      
+      const response = await fetch(API_URLS.changePassword, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': token,
+        },
+        body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Не удалось изменить пароль');
       return data;
     },
   },

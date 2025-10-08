@@ -180,6 +180,15 @@ export default function Index() {
     }
   };
 
+  const handleChangePassword = async (oldPassword: string, newPassword: string) => {
+    try {
+      await api.password.change(oldPassword, newPassword);
+      toast({ title: 'Успех', description: 'Пароль успешно изменён!' });
+    } catch (error: any) {
+      toast({ title: 'Ошибка', description: error.message, variant: 'destructive' });
+    }
+  };
+
   const loginDialogContent = (
     <div className="space-y-4 py-4">
       <Input 
@@ -226,6 +235,7 @@ export default function Index() {
       onCreateAnime={handleCreateAnime}
       animeList={animeList}
       onDeleteAnime={handleDeleteAnime}
+      onChangePassword={handleChangePassword}
     />
   );
 

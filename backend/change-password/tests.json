@@ -1,0 +1,18 @@
+{
+  "tests": [
+    {
+      "name": "Test password change without token",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "old_password": "OldPass123!",
+        "new_password": "NewPass123!"
+      },
+      "expectedStatus": 401,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
