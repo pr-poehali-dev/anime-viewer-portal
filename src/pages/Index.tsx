@@ -189,6 +189,27 @@ export default function Index() {
     }
   };
 
+  const handleUploadVideo = async (file: File): Promise<string> => {
+    try {
+      const url = await api.upload.file(file);
+      toast({ title: 'Успех', description: 'Видео загружено!' });
+      return url;
+    } catch (error: any) {
+      toast({ title: 'Ошибка', description: 'Не удалось загрузить видео', variant: 'destructive' });
+      throw error;
+    }
+  };
+
+  const handleUploadThumbnail = async (file: File): Promise<string> => {
+    try {
+      const url = await api.upload.file(file);
+      return url;
+    } catch (error: any) {
+      toast({ title: 'Ошибка', description: 'Не удалось загрузить обложку', variant: 'destructive' });
+      throw error;
+    }
+  };
+
   const loginDialogContent = (
     <div className="space-y-4 py-4">
       <Input 
@@ -236,6 +257,8 @@ export default function Index() {
       animeList={animeList}
       onDeleteAnime={handleDeleteAnime}
       onChangePassword={handleChangePassword}
+      onUploadVideo={handleUploadVideo}
+      onUploadThumbnail={handleUploadThumbnail}
     />
   );
 
