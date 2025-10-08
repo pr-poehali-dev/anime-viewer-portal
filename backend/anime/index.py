@@ -17,7 +17,7 @@ def verify_admin(token: str, jwt_secret: str) -> Dict[str, Any]:
     
     try:
         payload = jwt.decode(token, jwt_secret, algorithms=['HS256'])
-        if not payload.get('is_admin'):
+        if not payload.get('is_admin') and payload.get('role') != 'admin':
             return None
         return payload
     except:
@@ -54,12 +54,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         anime_id = query_params.get('id')
         
         if anime_id:
-            cur.execute("SELECT * FROM anime WHERE id = %s", (anime_id,))
+            cur.execute("SELECT * FROM t_p29917108_anime_viewer_portal.anime WHERE id = %s", (anime_id,))
             anime = cur.fetchone()
             
             if anime:
                 cur.execute(
-                    "SELECT c.id, c.comment_text, c.created_at, u.email FROM comments c JOIN users u ON c.user_id = u.id WHERE c.anime_id = %s ORDER BY c.created_at DESC",
+                    "SELECT c.id, c.comment_text, c.created_at, u.email FROM t_p29917108_anime_viewer_portal.comments c JOIN t_p29917108_anime_viewer_portal.users u ON c.user_id = u.id WHERE c.anime_id = %s ORDER BY c.created_at DESC",
                     (anime_id,)
                 )
                 comments = cur.fetchall()
@@ -80,7 +80,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
         
-        query = "SELECT * FROM anime WHERE 1=1"
+        query = "SELECT * FROM t_p29917108_anime_viewer_portal.anime WHERE 1=1"
         params = []
         
         if anime_type and anime_type != 'all':
@@ -137,7 +137,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         body = json.loads(event.get('body', '{}'))
         
         cur.execute(
-            """INSERT INTO anime (title, description, type, genre, year, episodes, thumbnail_url, video_url) 
+            """INSERT INTO t_p29917108_anime_viewer_portal.anime (title, description, type, genre, year, episodes, thumbnail_url, created_by) 
                VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING *""",
             (
                 body.get('title'),
@@ -147,7 +147,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 body.get('year'),
                 body.get('episodes', 1),
                 body.get('thumbnail_url', ''),
-                body.get('video_url', '')
+                admin['user_id']
             )
         )
         conn.commit()
@@ -187,8 +187,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         anime_id = body.get('id')
         
         cur.execute(
-            """UPDATE anime SET title = %s, description = %s, type = %s, genre = %s, 
-               year = %s, episodes = %s, thumbnail_url = %s, video_url = %s, updated_at = CURRENT_TIMESTAMP 
+            """UPDATE t_p29917108_anime_viewer_portal.anime SET title = %s, description = %s, type = %s, genre = %s, 
+               year = %s, episodes = %s, thumbnail_url = %s, updated_at = CURRENT_TIMESTAMP 
                WHERE id = %s RETURNING *""",
             (
                 body.get('title'),
@@ -198,7 +198,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 body.get('year'),
                 body.get('episodes'),
                 body.get('thumbnail_url'),
-                body.get('video_url'),
                 anime_id
             )
         )
@@ -251,7 +250,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
-        cur.execute("UPDATE anime SET updated_at = CURRENT_TIMESTAMP WHERE id = %s", (anime_id,))
+        cur.execute("UPDATE t_p29917108_anime_viewer_portal.anime SET updated_at = CURRENT_TIMESTAMP WHERE id = %s", (anime_id,))
         conn.commit()
         
         cur.close()
