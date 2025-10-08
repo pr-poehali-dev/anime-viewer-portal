@@ -250,7 +250,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
-        cur.execute("UPDATE t_p29917108_anime_viewer_portal.anime SET updated_at = CURRENT_TIMESTAMP WHERE id = %s", (anime_id,))
+        cur.execute("DELETE FROM t_p29917108_anime_viewer_portal.anime WHERE id = %s", (anime_id,))
         conn.commit()
         
         cur.close()

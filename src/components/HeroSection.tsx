@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
-import BannersCarousel from '@/components/BannersCarousel';
 
 interface HeroSectionProps {
   searchQuery: string;
@@ -11,8 +10,6 @@ interface HeroSectionProps {
 export default function HeroSection({ searchQuery, onSearchChange }: HeroSectionProps) {
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      <BannersCarousel />
-      
       <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-purple-900/50 via-background to-red-900/50 p-8">
         <div className="absolute inset-0" style={{
           backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(156, 39, 176, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 23, 68, 0.3) 0%, transparent 50%)',

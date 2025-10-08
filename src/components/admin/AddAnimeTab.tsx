@@ -34,6 +34,7 @@ export default function AddAnimeTab({
   const [uploadProgress, setUploadProgress] = useState(0);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const musicInputRef = useRef<HTMLInputElement>(null);
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -83,6 +84,29 @@ export default function AddAnimeTab({
     }
   };
 
+  const handleMusicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/')) {
+      toast({ title: 'Ошибка', description: 'Выберите аудио файл', variant: 'destructive' });
+      return;
+    }
+
+    setIsUploading(true);
+    
+    try {
+      const url = await onUploadThumbnail(file);
+      onNewAnimeChange({...newAnime, music_url: url});
+      toast({ title: 'Успех', description: 'Музыка загружена!' });
+    } catch (error: any) {
+      toast({ title: 'Ошибка', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsUploading(false);
+      if (musicInputRef.current) musicInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -119,6 +143,17 @@ export default function AddAnimeTab({
             />
           </div>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Музыка для аниме (опционально)</label>
+        <Input 
+          ref={musicInputRef}
+          type="file" 
+          accept="audio/*"
+          onChange={handleMusicUpload}
+          disabled={isUploading}
+        />
       </div>
 
       <Input 

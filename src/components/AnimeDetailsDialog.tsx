@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 import { type Anime, type User } from '@/lib/api';
 import VideoPlayer from '@/components/VideoPlayer';
+import MusicPlayer from '@/components/MusicPlayer';
 
 interface AnimeDetailsDialogProps {
   open: boolean;
@@ -37,6 +38,8 @@ export default function AnimeDetailsDialog({
           </DialogHeader>
           <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
             <VideoPlayer videoUrl={anime.video_url} title={anime.title} />
+            
+            <MusicPlayer musicUrl={(anime as any).music_url} title={`Музыка из ${anime.title}`} />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <img 
