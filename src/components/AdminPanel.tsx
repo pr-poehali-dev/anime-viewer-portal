@@ -22,6 +22,7 @@ interface AdminPanelProps {
   onCreateAnime: () => void;
   animeList: Anime[];
   onDeleteAnime: (id: number) => void;
+  onUpdateAnime: (anime: Anime) => void;
   onChangePassword: (oldPassword: string, newPassword: string) => void;
   onUploadVideo: (file: File) => Promise<string>;
   onUploadThumbnail: (file: File) => Promise<string>;
@@ -33,6 +34,7 @@ export default function AdminPanel({
   onCreateAnime,
   animeList,
   onDeleteAnime,
+  onUpdateAnime,
   onChangePassword,
   onUploadVideo,
   onUploadThumbnail,
@@ -44,8 +46,30 @@ export default function AdminPanel({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [editingAnime, setEditingAnime] = useState<Anime | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'title' | 'rating' | 'year'>('title');
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSaveEdit = () => {
+    if (!editingAnime) return;
+    onUpdateAnime(editingAnime);
+    setEditingAnime(null);
+    toast({ title: 'Успех', description: 'Аниме обновлено!' });
+  };
+
+  const filteredAnimeList = animeList
+    .filter(anime => 
+      anime.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      anime.genre.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortBy === 'title') return a.title.localeCompare(b.title);
+      if (sortBy === 'rating') return b.rating - a.rating;
+      if (sortBy === 'year') return b.year - a.year;
+      return 0;
+    });
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -195,18 +219,137 @@ export default function AdminPanel({
           Опубликовать аниме на сайт
         </Button>
       </TabsContent>
-      <TabsContent value="manage" className="space-y-2 max-h-[500px] overflow-y-auto">
-        <div className="mb-4 p-3 bg-muted rounded-lg">
-          <p className="text-sm font-medium">Всего аниме на сайте: {animeList.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">Вы можете удалить любое аниме из списка ниже</p>
+      <TabsContent value="manage" className="space-y-3">
+        <div className="p-3 bg-muted rounded-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Всего аниме на сайте: {animeList.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">Вы можете редактировать или удалить любое аниме</p>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input 
+                placeholder="🔍 Поиск по названию или жанру..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Select value={sortBy} onValueChange={(v: 'title' | 'rating' | 'year') => setSortBy(v)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="title">По названию</SelectItem>
+                <SelectItem value="rating">По рейтингу</SelectItem>
+                <SelectItem value="year">По году</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        {animeList.length === 0 ? (
+        
+        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+        
+        {editingAnime && (
+          <div className="mb-4 p-4 rounded-lg bg-primary/10 border-2 border-primary space-y-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-semibold flex items-center gap-2">
+                <Icon name="Edit" size={18} />
+                Редактирование: {editingAnime.title}
+              </h4>
+              <Button variant="ghost" size="sm" onClick={() => setEditingAnime(null)}>
+                <Icon name="X" size={16} />
+              </Button>
+            </div>
+            
+            <Input 
+              placeholder="Название"
+              value={editingAnime.title}
+              onChange={(e) => setEditingAnime({...editingAnime, title: e.target.value})}
+            />
+            <Textarea 
+              placeholder="Описание"
+              value={editingAnime.description || ''}
+              onChange={(e) => setEditingAnime({...editingAnime, description: e.target.value})}
+              rows={3}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <Select 
+                value={editingAnime.type} 
+                onValueChange={(v: 'series' | 'movie') => setEditingAnime({...editingAnime, type: v})}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="series">Сериал</SelectItem>
+                  <SelectItem value="movie">Фильм</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input 
+                placeholder="Жанр"
+                value={editingAnime.genre}
+                onChange={(e) => setEditingAnime({...editingAnime, genre: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Input 
+                placeholder="Год"
+                type="number"
+                value={editingAnime.year}
+                onChange={(e) => setEditingAnime({...editingAnime, year: parseInt(e.target.value)})}
+              />
+              <Input 
+                placeholder="Эпизоды"
+                type="number"
+                value={editingAnime.episodes}
+                onChange={(e) => setEditingAnime({...editingAnime, episodes: parseInt(e.target.value)})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Обложка (превью)</label>
+              <div className="flex gap-2 items-center">
+                <Input 
+                  placeholder="URL обложки"
+                  value={editingAnime.thumbnail_url || ''}
+                  onChange={(e) => setEditingAnime({...editingAnime, thumbnail_url: e.target.value})}
+                  className="flex-1"
+                />
+                {editingAnime.thumbnail_url && (
+                  <img 
+                    src={editingAnime.thumbnail_url} 
+                    alt="Preview" 
+                    className="w-10 h-14 object-cover rounded border"
+                  />
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button className="flex-1" onClick={handleSaveEdit}>
+                <Icon name="Save" size={16} className="mr-2" />
+                Сохранить изменения
+              </Button>
+              <Button variant="outline" onClick={() => setEditingAnime(null)}>
+                <Icon name="X" size={16} className="mr-2" />
+                Отмена
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {filteredAnimeList.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <Icon name="FileX" size={48} className="mx-auto mb-2 opacity-50" />
-            <p>Аниме пока нет. Добавьте первое!</p>
+            <Icon name={searchTerm ? "Search" : "FileX"} size={48} className="mx-auto mb-2 opacity-50" />
+            <p>{searchTerm ? 'Ничего не найдено' : 'Аниме пока нет. Добавьте первое!'}</p>
+            {searchTerm && (
+              <Button variant="link" size="sm" onClick={() => setSearchTerm('')}>
+                Очистить поиск
+              </Button>
+            )}
           </div>
         ) : (
-          animeList.map(anime => (
+          filteredAnimeList.map(anime => (
             <div key={anime.id} className="flex items-center justify-between p-3 rounded-lg bg-card border border-border hover:border-primary transition-colors">
               <div className="flex items-center gap-3 flex-1">
                 <img src={anime.thumbnail_url} alt={anime.title} className="w-12 h-16 object-cover rounded" />
@@ -216,18 +359,28 @@ export default function AdminPanel({
                   <p className="text-xs text-muted-foreground">Рейтинг: {anime.rating.toFixed(1)}/10 ({anime.rating_count} оценок)</p>
                 </div>
               </div>
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                onClick={() => {
-                  if (confirm(`Удалить "${anime.title}"? Это действие нельзя отменить.`)) {
-                    onDeleteAnime(anime.id);
-                  }
-                }}
-              >
-                <Icon name="Trash2" size={16} className="mr-1" />
-                Удалить
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setEditingAnime(anime)}
+                >
+                  <Icon name="Edit" size={16} className="mr-1" />
+                  Изменить
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => {
+                    if (confirm(`Удалить "${anime.title}"? Это действие нельзя отменить.`)) {
+                      onDeleteAnime(anime.id);
+                    }
+                  }}
+                >
+                  <Icon name="Trash2" size={16} className="mr-1" />
+                  Удалить
+                </Button>
+              </div>
             </div>
           ))
         )}

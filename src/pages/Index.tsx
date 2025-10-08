@@ -142,6 +142,16 @@ export default function Index() {
     }
   };
 
+  const handleUpdateAnime = async (anime: Anime) => {
+    try {
+      await api.anime.update(anime);
+      toast({ title: 'Успех', description: 'Аниме обновлено!' });
+      loadAnime();
+    } catch (error: any) {
+      toast({ title: 'Ошибка', description: error.message, variant: 'destructive' });
+    }
+  };
+
   const handleAddComment = async () => {
     if (!selectedAnime || !newComment.trim()) return;
     
@@ -256,6 +266,7 @@ export default function Index() {
       onCreateAnime={handleCreateAnime}
       animeList={animeList}
       onDeleteAnime={handleDeleteAnime}
+      onUpdateAnime={handleUpdateAnime}
       onChangePassword={handleChangePassword}
       onUploadVideo={handleUploadVideo}
       onUploadThumbnail={handleUploadThumbnail}
